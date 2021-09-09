@@ -6,7 +6,7 @@ modules:
     - key: bug-trap
       function: main
       title: bug-trap
-      description: Catches errors in production.
+      description: Catches errors in web applications.
   function:
     - key: main
       handler: index.run
