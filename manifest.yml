@@ -11,7 +11,7 @@ modules:
     - key: main
       handler: index.run
     - key: web-trigger-function
-      handler: index.runWebTrigger
+      handler: webTrigger.run
 app:
   id: ari:cloud:ecosystem::app/1d0c5aad-f460-4c56-b93c-323f47924e57
   name: bug-trap
