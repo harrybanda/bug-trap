@@ -20,17 +20,34 @@ export const ErrorsTable = () => {
   const [selectedErrors, setSelectedErrors] = useState([]);
   const [occurrences, setOccurrences] = useState([]);
   const [users, setUsers] = useState([]);
-  const [navButtonsL, setNavButtonsL] = useState(true);
-  const [navButtonsR, setNavButtonsR] = useState(true);
-  const [currentError, setCurrentError] = useState(0);
+  const [disableL, setDisableL] = useState(true);
+  const [disableR, setDisableR] = useState(true);
+  const [errorIndex, setErrorIndex] = useState(0);
+  const [feedbacks, setFeedbacks] = useState([]);
+  const [currentFeedback, setCurrentFeedback] = useState(undefined);
 
   useEffect(async () => {
     const _errors = await storage
       .query()
       .where("key", startsWith("error_group_"))
       .getMany();
+
+    const _feedbacks = await storage
+      .query()
+      .where("key", startsWith("error_id_"))
+      .getMany();
+
     setErrors(_errors.results);
+    setFeedbacks(_feedbacks.results);
   }, []);
+
+  const feedbackExists = (id) => {
+    return feedbacks.some(function (el) {
+      if (el.key === id) {
+        setCurrentFeedback(el.value);
+      }
+    });
+  };
 
   return (
     <Fragment>
@@ -40,12 +57,15 @@ export const ErrorsTable = () => {
         errorData={selectedErrors}
         occurrences={occurrences}
         users={users}
-        navButtonsL={navButtonsL}
-        setNavButtonsL={setNavButtonsL}
-        navButtonsR={navButtonsR}
-        setNavButtonsR={setNavButtonsR}
-        currentError={currentError}
-        setCurrentError={setCurrentError}
+        disableL={disableL}
+        setDisableL={setDisableL}
+        disableR={disableR}
+        setDisableR={setDisableR}
+        errorIndex={errorIndex}
+        setErrorIndex={setErrorIndex}
+        feedbacks={feedbacks}
+        currentFeedback={currentFeedback}
+        setCurrentFeedback={setCurrentFeedback}
       />
       {errors.length == 0 ? (
         <Text>No errors reported</Text>
@@ -92,14 +112,15 @@ export const ErrorsTable = () => {
                       setUsers(error.value.users);
 
                       if (error.value.occurrences > 1) {
-                        setNavButtonsL(true);
-                        setNavButtonsR(false);
+                        setDisableL(true);
+                        setDisableR(false);
                       } else {
-                        setNavButtonsL(true);
-                        setNavButtonsR(true);
+                        setDisableL(true);
+                        setDisableR(true);
                       }
-
                       setOpenError(true);
+
+                      feedbackExists(error.value.errors[errorIndex].errorId);
                     }}
                   />
                   <Button icon="trash" />

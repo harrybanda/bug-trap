@@ -14,7 +14,6 @@ import ForgeUI, {
   Tag,
   TagGroup,
 } from "@forge/ui";
-import moment from "moment";
 
 export const ErrorDialog = ({
   isOpen,
@@ -22,14 +21,42 @@ export const ErrorDialog = ({
   errorData,
   occurrences,
   users,
-  navButtonsL,
-  navButtonsR,
-  setNavButtonsL,
-  setNavButtonsR,
-  currentError,
-  setCurrentError,
+  disableL,
+  disableR,
+  setDisableL,
+  setDisableR,
+  errorIndex,
+  setErrorIndex,
+  feedbacks,
+  currentFeedback,
+  setCurrentFeedback,
 }) => {
-  let feedback = undefined;
+  const errorPrev = () => {
+    let index = errorIndex - 1;
+    let disableL = index === 0;
+    setErrorIndex(index);
+    setDisableL(disableL);
+    setDisableR(false);
+    feedbackExists(errorData[index].errorId);
+  };
+
+  const errorNext = () => {
+    let index = errorIndex + 1;
+    let disableR = index === occurrences - 1;
+    setErrorIndex(index);
+    setDisableR(disableR);
+    setDisableL(false);
+    feedbackExists(errorData[index].errorId);
+  };
+
+  const feedbackExists = (id) => {
+    return feedbacks.some(function (el) {
+      if (el.key === id) {
+        setCurrentFeedback(el.value);
+      }
+    });
+  };
+
   return (
     <Fragment>
       {isOpen && (
@@ -39,22 +66,22 @@ export const ErrorDialog = ({
             <Tag color="green" text={users + " users"} />
           </TagGroup>
           <Heading size="medium">
-            {errorData[currentError].fullErrorMessage}
+            {errorData[errorIndex].fullErrorMessage}
           </Heading>
           <Text>
             <Strong>
-              {JSON.parse(errorData[currentError].fileInfo).functionName +
+              {JSON.parse(errorData[errorIndex].fileInfo).functionName +
                 ".js" +
                 " " +
-                JSON.parse(errorData[currentError].fileInfo).lineNumber +
+                JSON.parse(errorData[errorIndex].fileInfo).lineNumber +
                 ":" +
-                JSON.parse(errorData[currentError].fileInfo).columnNumber}
+                JSON.parse(errorData[errorIndex].fileInfo).columnNumber}
             </Strong>
           </Text>
-          <Text>{moment(errorData[currentError].date).format("LLLL")}</Text>
+          <Text>{errorData[errorIndex].fullDate}</Text>
           <Text>
-            <Link href={errorData[currentError].url}>
-              {errorData[currentError].url}
+            <Link href={errorData[errorIndex].url}>
+              {errorData[errorIndex].url}
             </Link>
           </Text>
           <Table>
@@ -74,57 +101,41 @@ export const ErrorDialog = ({
             </Head>
             <Row>
               <Cell>
-                <Text>{errorData[currentError].browserName}</Text>
+                <Text>{errorData[errorIndex].browserName}</Text>
               </Cell>
               <Cell>
-                <Text>{errorData[currentError].browserVersion}</Text>
+                <Text>{errorData[errorIndex].browserVersion}</Text>
               </Cell>
               <Cell>
-                <Text>{errorData[currentError].osName}</Text>
+                <Text>{errorData[errorIndex].osName}</Text>
               </Cell>
               <Cell>
-                <Text>{errorData[currentError].osVersion}</Text>
+                <Text>{errorData[errorIndex].osVersion}</Text>
               </Cell>
             </Row>
           </Table>
           <Text>
             <Strong>User Feedback</Strong>
           </Text>
-          {feedback == undefined ? (
+          {currentFeedback == undefined ? (
             <Text>No Feedback</Text>
           ) : (
-            <Text>{error.feedback}</Text>
+            <Text>{currentFeedback.report}</Text>
           )}
           <ButtonSet>
             <Button
-              disabled={navButtonsL}
+              disabled={disableL}
               icon="arrow-left"
-              onClick={() => {
-                currentError--;
-                if (currentError == 0) {
-                  setNavButtonsL(true);
-                } else {
-                  setNavButtonsR(false);
-                }
-                setCurrentError(currentError);
-              }}
+              onClick={() => errorPrev()}
             />
             <Button
-              disabled={navButtonsR}
+              disabled={disableR}
               icon="arrow-right"
-              onClick={() => {
-                currentError++;
-                if (currentError == occurrences - 1) {
-                  setNavButtonsR(true);
-                } else {
-                  setNavButtonsL(false);
-                }
-                setCurrentError(currentError);
-              }}
+              onClick={() => errorNext()}
             />
             <Button text="Create Issue" />
           </ButtonSet>
-          <Text>{currentError + 1 + "/" + occurrences + " occurrences"}</Text>
+          <Text>{errorIndex + 1 + "/" + occurrences + " occurrences"}</Text>
         </ModalDialog>
       )}
     </Fragment>

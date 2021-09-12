@@ -1,4 +1,4 @@
-import { storage } from "@forge/api";
+import { storage, startsWith } from "@forge/api";
 
 const buildOutput = () => ({
   body: "",
@@ -23,13 +23,11 @@ const getUsers = (arr) => {
   return result.length;
 };
 
-export const run = async (req) => {
-  //await storage.delete("error_group_04ee14e0-bedc-5235-b570-3762f12accd7");
-
-  let errorsId = JSON.parse(req.body).errorData.errorsId;
+const saveError = async (req) => {
+  let errorGroupId = JSON.parse(req.body).errorData.errorGroupId;
   let errorData = JSON.parse(req.body).errorData;
 
-  const errors = await storage.get(errorsId);
+  const errors = await storage.get(errorGroupId);
 
   if (errors === undefined) {
     const error = {
@@ -40,7 +38,7 @@ export const run = async (req) => {
       errors: [errorData],
     };
 
-    await storage.set(errorsId, error);
+    await storage.set(errorGroupId, error);
   } else {
     const currentErrors = [errorData, ...(errors.errors ? errors.errors : [])];
     const occurrences = currentErrors.length;
@@ -54,8 +52,42 @@ export const run = async (req) => {
       errors: currentErrors,
     };
 
-    await storage.set(errorsId, error);
+    await storage.set(errorGroupId, error);
   }
+};
 
+const saveFeedback = async (req) => {
+  let feedback = JSON.parse(req.body).feedback;
+  let feedbackId = feedback.errorId;
+  await storage.set(feedbackId, feedback);
+};
+
+export const run = async (req) => {
+  //await deleteAll();
+  if ("errorData" in JSON.parse(req.body)) {
+    await saveError(req);
+  } else if ("feedback" in JSON.parse(req.body)) {
+    await saveFeedback(req);
+  }
   return buildOutput();
+};
+
+const deleteAll = async () => {
+  const _feedbacks = await storage
+    .query()
+    .where("key", startsWith("error_id_"))
+    .getMany();
+
+  _feedbacks.results.forEach(async (f) => {
+    await storage.delete(f.key);
+  });
+
+  const _errors = await storage
+    .query()
+    .where("key", startsWith("error_group_"))
+    .getMany();
+
+  _errors.results.forEach(async (e) => {
+    await storage.delete(e.key);
+  });
 };
