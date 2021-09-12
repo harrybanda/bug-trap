@@ -14,38 +14,51 @@ import ForgeUI, {
   Tag,
   TagGroup,
 } from "@forge/ui";
+import moment from "moment";
 
-export const ErrorDialog = ({ isOpen, setOpen }) => {
-  const error = {
-    message: "x not defined",
-    occurrences: 2,
-    users: 5,
-    time: "3 minutes ago",
-    feedback:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
-  };
+export const ErrorDialog = ({
+  isOpen,
+  setOpen,
+  errorData,
+  occurrences,
+  users,
+  navButtonsL,
+  navButtonsR,
+  setNavButtonsL,
+  setNavButtonsR,
+  currentError,
+  setCurrentError,
+}) => {
+  let feedback = undefined;
   return (
     <Fragment>
       {isOpen && (
         <ModalDialog header="Error Information" onClose={() => setOpen(false)}>
           <TagGroup>
-            <Tag color="green" text="5 occurrences" />
-            <Tag color="green" text="2 users" />
+            <Tag color="green" text={occurrences + " occurrences"} />
+            <Tag color="green" text={users + " users"} />
           </TagGroup>
-          <Heading size="medium">X is not defined</Heading>
+          <Heading size="medium">
+            {errorData[currentError].fullErrorMessage}
+          </Heading>
           <Text>
-            <Strong>HomePage.js 50:5</Strong>
+            <Strong>
+              {JSON.parse(errorData[currentError].fileInfo).functionName +
+                ".js" +
+                " " +
+                JSON.parse(errorData[currentError].fileInfo).lineNumber +
+                ":" +
+                JSON.parse(errorData[currentError].fileInfo).columnNumber}
+            </Strong>
           </Text>
-          <Text>May 25, 2020 9:00:00 PM UTC</Text>
-
+          <Text>{moment(errorData[currentError].date).format("LLLL")}</Text>
           <Text>
-            <Link href="http://localhost:3000/">http://localhost:3000/</Link>
+            <Link href={errorData[currentError].url}>
+              {errorData[currentError].url}
+            </Link>
           </Text>
           <Table>
             <Head>
-              <Cell>
-                <Text>User ID</Text>
-              </Cell>
               <Cell>
                 <Text>Browser Name</Text>
               </Cell>
@@ -55,35 +68,63 @@ export const ErrorDialog = ({ isOpen, setOpen }) => {
               <Cell>
                 <Text>OS</Text>
               </Cell>
+              <Cell>
+                <Text>OS Version</Text>
+              </Cell>
             </Head>
             <Row>
               <Cell>
-                <Text>453535435345</Text>
+                <Text>{errorData[currentError].browserName}</Text>
               </Cell>
               <Cell>
-                <Text>Chrome</Text>
+                <Text>{errorData[currentError].browserVersion}</Text>
               </Cell>
               <Cell>
-                <Text>67.7</Text>
+                <Text>{errorData[currentError].osName}</Text>
               </Cell>
               <Cell>
-                <Text>Mac</Text>
+                <Text>{errorData[currentError].osVersion}</Text>
               </Cell>
             </Row>
           </Table>
           <Text>
             <Strong>User Feedback</Strong>
           </Text>
-          {error.feedback == "" ? (
+          {feedback == undefined ? (
             <Text>No Feedback</Text>
           ) : (
             <Text>{error.feedback}</Text>
           )}
           <ButtonSet>
-            <Button icon="arrow-left" />
-            <Button icon="arrow-right" />
+            <Button
+              disabled={navButtonsL}
+              icon="arrow-left"
+              onClick={() => {
+                currentError--;
+                if (currentError == 0) {
+                  setNavButtonsL(true);
+                } else {
+                  setNavButtonsR(false);
+                }
+                setCurrentError(currentError);
+              }}
+            />
+            <Button
+              disabled={navButtonsR}
+              icon="arrow-right"
+              onClick={() => {
+                currentError++;
+                if (currentError == occurrences - 1) {
+                  setNavButtonsR(true);
+                } else {
+                  setNavButtonsL(false);
+                }
+                setCurrentError(currentError);
+              }}
+            />
             <Button text="Create Issue" />
           </ButtonSet>
+          <Text>{currentError + 1 + "/" + occurrences + " occurrences"}</Text>
         </ModalDialog>
       )}
     </Fragment>
