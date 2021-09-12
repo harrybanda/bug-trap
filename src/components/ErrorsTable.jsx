@@ -49,6 +49,14 @@ export const ErrorsTable = () => {
     });
   };
 
+  const removeError = async (idx) => {
+    await storage.delete(idx).then(() => {
+      const temp = [...errors];
+      temp.splice(idx, 1);
+      setErrors(temp);
+    });
+  };
+
   return (
     <Fragment>
       <ErrorDialog
@@ -123,7 +131,14 @@ export const ErrorsTable = () => {
                       feedbackExists(error.value.errors[errorIndex].errorId);
                     }}
                   />
-                  <Button icon="trash" />
+                  <Button
+                    icon="trash"
+                    onClick={async () => {
+                      await removeError(
+                        error.value.errors[errorIndex].errorGroupId
+                      );
+                    }}
+                  />
                 </ButtonSet>
               </Cell>
             </Row>
