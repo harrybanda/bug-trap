@@ -5,7 +5,6 @@ import ForgeUI, {
   ButtonSet,
   Text,
   Strong,
-  Link,
   Heading,
   Table,
   Head,
@@ -13,6 +12,7 @@ import ForgeUI, {
   Cell,
   Tag,
   TagGroup,
+  Link,
 } from "@forge/ui";
 
 export const ErrorDialog = ({
@@ -30,6 +30,10 @@ export const ErrorDialog = ({
   feedbacks,
   currentFeedback,
   setCurrentFeedback,
+  createIssue,
+  issueCreated,
+  issueKey,
+  site,
 }) => {
   const errorPrev = () => {
     let index = errorIndex - 1;
@@ -133,9 +137,56 @@ export const ErrorDialog = ({
               icon="arrow-right"
               onClick={() => errorNext()}
             />
-            <Button text="Create Issue" />
+            <Button
+              text="Create Issue"
+              onClick={async () => {
+                const file =
+                  JSON.parse(errorData[errorIndex].fileInfo).functionName +
+                  ".js" +
+                  " " +
+                  JSON.parse(errorData[errorIndex].fileInfo).lineNumber +
+                  ":" +
+                  JSON.parse(errorData[errorIndex].fileInfo).columnNumber;
+
+                const errorName = errorData[errorIndex].errorName;
+
+                const summary = `Bug Trap Ticket | ${errorName}`;
+
+                const desc = `*Error Message:* {color:red}${
+                  errorData[errorIndex].fullErrorMessage
+                }{color}
+                *Date:* ${errorData[errorIndex].fullDate}
+                *URL:* ${errorData[errorIndex].url}
+                *Affected File:* ${file}
+                *Browser:* ${errorData[errorIndex].browserName} ${
+                  errorData[errorIndex].browserVersion
+                }
+                *Operating System:* ${errorData[errorIndex].osName} ${
+                  errorData[errorIndex].osVersion
+                }
+                
+                *User Feedback:*
+                ${
+                  currentFeedback == undefined
+                    ? "No user feedback"
+                    : currentFeedback.report
+                }
+                `;
+
+                await createIssue(summary, desc);
+              }}
+            />
           </ButtonSet>
           <Text>{errorIndex + 1 + "/" + occurrences + " occurrences"}</Text>
+
+          {issueCreated === true && (
+            <Text>
+              🙏 <Strong>Ticket created:</Strong>
+              <Link appearance="link" href={site + "/browse/" + issueKey}>
+                {site + "/browse/" + issueKey}
+              </Link>
+            </Text>
+          )}
         </ModalDialog>
       )}
     </Fragment>

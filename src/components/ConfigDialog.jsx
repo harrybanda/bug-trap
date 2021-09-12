@@ -27,13 +27,13 @@ import { BugTrap } from "react-bug-trap";
   return (
     <Fragment>
       <Button
-        text="Configuration"
+        text="Project Setup"
         icon="settings"
         iconPosition="before"
         onClick={() => setOpen(true)}
       />
       {isOpen && (
-        <ModalDialog header="Configuration" onClose={() => setOpen(false)}>
+        <ModalDialog header="Project Setup" onClose={() => setOpen(false)}>
           <Text>
             <Strong>Installation</Strong>
           </Text>

@@ -14,7 +14,7 @@ import moment from "moment";
 import { storage, startsWith } from "@forge/api";
 import { ErrorDialog } from "./ErrorDialog";
 
-export const ErrorsTable = () => {
+export const ErrorsTable = ({ createIssue, issueCreated, issueKey, site }) => {
   const [isOpenError, setOpenError] = useState(false);
   const [errors, setErrors] = useState([]);
   const [selectedErrors, setSelectedErrors] = useState([]);
@@ -74,6 +74,10 @@ export const ErrorsTable = () => {
         feedbacks={feedbacks}
         currentFeedback={currentFeedback}
         setCurrentFeedback={setCurrentFeedback}
+        createIssue={createIssue}
+        issueCreated={issueCreated}
+        issueKey={issueKey}
+        site={site}
       />
       {errors.length == 0 ? (
         <Text>No errors reported</Text>

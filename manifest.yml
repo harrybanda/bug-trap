@@ -7,14 +7,20 @@ modules:
       function: main
       title: bug-trap
       description: Catches errors in web applications.
+      config:
+        function: config-function-key
   function:
     - key: main
       handler: index.run
     - key: web-trigger-function
       handler: webTrigger.run
+    - key: config-function-key
+      handler: index.config
 app:
   id: ari:cloud:ecosystem::app/1d0c5aad-f460-4c56-b93c-323f47924e57
   name: bug-trap
 permissions:
   scopes:
     - "storage:app"
+    - "write:jira-work"
+    - "read:jira-work"
